@@ -43,50 +43,36 @@ function trapezoidalMF(x, a, b, c, d) {
 // Lebar Perangkat
 function fuzzifyDeviceWidth(width) {
     return {
-        mobile: trapezoidalMF(width, 0, 0, 360, 767),
-        tablet: triangularMF(width, 361, 768, 1023),
+        mobile: trapezoidalMF(width, 0, 0, 480, 767),
+        tablet: triangularMF(width, 481, 768, 1023),
         desktop: trapezoidalMF(width, 769, 1024, 1920, 1920)
     };
 }
 
-// Ukuran Teks
-function fuzzifyTextSize(size, type = 'heading') {
-    if (type === 'heading') {
-        return {
-            kecil: trapezoidalMF(size, 12, 12, 16, 23),
-            normal: triangularMF(size, 18, 24, 35),
-            besar: trapezoidalMF(size, 30, 36, 48, 48)
-        };
-    } else { // subheading
-        return {
-            kecil: trapezoidalMF(size, 10, 10, 14, 17),
-            normal: triangularMF(size, 14, 18, 23),
-            besar: trapezoidalMF(size, 20, 24, 36, 36)
-        };
-    }
-}
-
-// Luminositas (0-100)
-function fuzzifyLuminosity(luminosity) {
+// Ukuran Teks (menggunakan referensi yang lebih sederhana)
+function fuzzifyTextSize(size) {
     return {
-        hitam: triangularMF(luminosity, 0, 0, 10),
-        sangat_gelap: triangularMF(luminosity, 5, 15, 25),
-        gelap: triangularMF(luminosity, 20, 30, 40),
-        agak_gelap: triangularMF(luminosity, 35, 45, 55),
-        normal: triangularMF(luminosity, 50, 60, 70),
-        agak_terang: triangularMF(luminosity, 65, 75, 85),
-        terang: triangularMF(luminosity, 80, 85, 90),
-        sangat_terang: triangularMF(luminosity, 88, 93, 98),
-        putih: triangularMF(luminosity, 95, 100, 100)
+        kecil: triangularMF(size, 10, 14, 18),
+        normal: triangularMF(size, 16, 22, 28),
+        besar: triangularMF(size, 26, 38, 48)
     };
 }
 
-// Saturasi (0-100)
-function fuzzifySaturation(saturation) {
+// Delta Luminositas (adaptasi dari referensi)
+function fuzzifyDeltaLuminosity(deltaL) {
     return {
-        pucat: triangularMF(saturation, 0, 0, 50),
-        normal: triangularMF(saturation, 0, 50, 100),
-        mencolok: triangularMF(saturation, 50, 100, 100)
+        buruk: triangularMF(deltaL, 0, 15, 30),
+        menengah: triangularMF(deltaL, 25, 40, 55),
+        bagus: triangularMF(deltaL, 50, 65, 80),
+        ekstrem: triangularMF(deltaL, 75, 100, 100)
+    };
+}
+
+// Saturasi Gabungan (adaptasi dari referensi)
+function fuzzifySaturationCombined(saturation) {
+    return {
+        normal_pucat: triangularMF(saturation, 0, 25, 50),
+        mencolok: triangularMF(saturation, 40, 70, 100)
     };
 }
 
@@ -99,70 +85,10 @@ function fuzzyOr(a, b) {
     return Math.max(a, b);
 }
 
-// --- Sistem Kontrol 1: Skor Kontras WCAG ---
-function calculateWCAGScore(luminositas_bg, luminositas_fg, saturasi_bg, saturasi_fg, ukuran_heading, ukuran_subheading) {
-    // Fuzzifikasi input
-    const lumi_bg = fuzzifyLuminosity(luminositas_bg);
-    const lumi_fg = fuzzifyLuminosity(luminositas_fg);
-    const sat_bg = fuzzifySaturation(saturasi_bg);
-    const sat_fg = fuzzifySaturation(saturasi_fg);
-    const heading = fuzzifyTextSize(ukuran_heading, 'heading');
-    const subheading = fuzzifyTextSize(ukuran_subheading, 'subheading');
-
-    // Kondisi yang didefinisikan
-    const kondisi_kontras_ekstrem = fuzzyOr(
-        fuzzyAnd(
-            fuzzyOr(lumi_bg.hitam, lumi_bg.sangat_gelap),
-            fuzzyOr(lumi_fg.putih, lumi_fg.sangat_terang)
-        ),
-        fuzzyAnd(
-            fuzzyOr(lumi_bg.putih, lumi_bg.sangat_terang),
-            fuzzyOr(lumi_fg.hitam, lumi_fg.sangat_gelap)
-        )
-    );
-
-    const kondisi_kontras_bagus = fuzzyOr(
-        fuzzyAnd(lumi_bg.gelap, lumi_fg.terang),
-        fuzzyAnd(lumi_bg.terang, lumi_fg.gelap)
-    );
-
-    const kondisi_kontras_menengah = fuzzyOr(
-        fuzzyAnd(lumi_bg.agak_gelap, lumi_fg.agak_terang),
-        fuzzyAnd(lumi_bg.agak_terang, lumi_fg.agak_gelap)
-    );
-
-    const kondisi_kontras_buruk = fuzzyOr(
-        fuzzyAnd(lumi_bg.normal, lumi_fg.normal),
-        fuzzyAnd(lumi_bg.gelap, lumi_bg.agak_gelap)
-    );
-
-    const kondisi_teks_besar = fuzzyOr(heading.besar, subheading.besar);
-    const kondisi_teks_normal = fuzzyOr(heading.normal, subheading.normal);
-    const kondisi_teks_kecil = fuzzyOr(heading.kecil, subheading.kecil);
-
-    // Aturan-aturan
-    const rule_k1 = kondisi_kontras_ekstrem; // AAA
-    const rule_k2 = fuzzyAnd(kondisi_kontras_bagus, kondisi_teks_besar); // AAA
-    const rule_k3 = fuzzyAnd(
-        fuzzyAnd(kondisi_kontras_bagus, kondisi_teks_normal),
-        fuzzyOr(sat_bg.normal, sat_bg.pucat)
-    ); // AA
-    const rule_k4 = fuzzyAnd(kondisi_kontras_menengah, kondisi_teks_besar); // AA
-    const rule_k5 = fuzzyAnd(kondisi_kontras_menengah, fuzzyOr(kondisi_teks_normal, kondisi_teks_kecil)); // Gagal
-    const rule_k6 = fuzzyAnd(
-        fuzzyAnd(fuzzyAnd(kondisi_kontras_bagus, kondisi_teks_normal), sat_bg.mencolok),
-        sat_fg.mencolok
-    ); // Gagal
-    const rule_k7 = kondisi_kontras_buruk; // Gagal
-
-    // Agregasi output
-    const aaa_strength = fuzzyOr(rule_k1, rule_k2);
-    const aa_strength = fuzzyOr(rule_k3, rule_k4);
-    const gagal_strength = fuzzyOr(fuzzyOr(rule_k5, rule_k6), rule_k7);
-
-    // Defuzzifikasi menggunakan centroid sederhana
-    const centers = { Gagal: 25, AA: 67.5, AAA: 92.5 };
-    const numerator = (gagal_strength * centers.Gagal) + (aa_strength * centers.AA) + (aaa_strength * centers.AAA);
+// --- Defuzzifikasi menggunakan centroid sederhana ---
+function defuzzifyWCAG(aaa_strength, aa_strength, gagal_strength) {
+    const centers = { gagal: 20, aa: 55, aaa: 85 };
+    const numerator = (gagal_strength * centers.gagal) + (aa_strength * centers.aa) + (aaa_strength * centers.aaa);
     const denominator = gagal_strength + aa_strength + aaa_strength;
 
     if (denominator === 0) return { score: 0, category: 'Gagal' };
@@ -180,12 +106,48 @@ function calculateWCAGScore(luminositas_bg, luminositas_fg, saturasi_bg, saturas
     return { score: Math.round(score * 100) / 100, category };
 }
 
-// --- Sistem Kontrol 2: Visibilitas Teks ---
+// --- Sistem Kontrol 1: Skor Kontras WCAG (diadaptasi dari referensi) ---
+function calculateWCAGScore(luminositas_bg, luminositas_fg, saturasi_bg, saturasi_fg, ukuran_heading, ukuran_subheading) {
+    // Hitung delta luminositas dan saturasi gabungan (seperti di referensi)
+    const delta_l = Math.abs(luminositas_bg - luminositas_fg);
+    const saturasi_gabungan = (saturasi_bg + saturasi_fg) / 2;
+    const ukuran_teks_rata = (ukuran_heading + ukuran_subheading) / 2;
+
+    // Fuzzifikasi input
+    const deltaLMembership = fuzzifyDeltaLuminosity(delta_l);
+    const saturasiMembership = fuzzifySaturationCombined(saturasi_gabungan);
+    const ukuranTeksMembership = fuzzifyTextSize(ukuran_teks_rata);
+
+    // Kondisi berdasarkan referensi
+    const kondisi_teks_besar = ukuranTeksMembership.besar;
+    const kondisi_teks_normal_kecil = fuzzyOr(ukuranTeksMembership.normal, ukuranTeksMembership.kecil);
+
+    // Aturan-aturan berdasarkan referensi
+    const ruleK1 = deltaLMembership.ekstrem; // AAA
+    const ruleK2 = fuzzyAnd(deltaLMembership.bagus, kondisi_teks_besar); // AAA
+    const ruleK3 = fuzzyAnd(
+        fuzzyAnd(deltaLMembership.bagus, kondisi_teks_normal_kecil),
+        saturasiMembership.normal_pucat
+    ); // AA
+    const ruleK4 = fuzzyAnd(deltaLMembership.menengah, kondisi_teks_besar); // AA
+    const ruleK5 = fuzzyAnd(deltaLMembership.menengah, kondisi_teks_normal_kecil); // Gagal
+    const ruleK6 = fuzzyAnd(deltaLMembership.bagus, saturasiMembership.mencolok); // Gagal
+    const ruleK7 = deltaLMembership.buruk; // Gagal
+
+    // Agregasi output
+    const aaa_strength = fuzzyOr(ruleK1, ruleK2);
+    const aa_strength = fuzzyOr(ruleK3, ruleK4);
+    const gagal_strength = fuzzyOr(fuzzyOr(ruleK5, ruleK6), ruleK7);
+
+    return defuzzifyWCAG(aaa_strength, aa_strength, gagal_strength);
+}
+
+// --- Sistem Kontrol 2: Visibilitas Teks (tetap menggunakan logika yang sudah baik) ---
 function calculateVisibilityScore(lebar_perangkat, ukuran_heading, ukuran_subheading) {
     // Fuzzifikasi input
     const device = fuzzifyDeviceWidth(lebar_perangkat);
-    const heading = fuzzifyTextSize(ukuran_heading, 'heading');
-    const subheading = fuzzifyTextSize(ukuran_subheading, 'subheading');
+    const heading = fuzzifyTextSize(ukuran_heading);
+    const subheading = fuzzifyTextSize(ukuran_subheading);
 
     const kondisi_teks_besar = fuzzyOr(heading.besar, subheading.besar);
     const kondisi_teks_normal = fuzzyOr(heading.normal, subheading.normal);
