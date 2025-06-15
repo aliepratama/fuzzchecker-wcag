@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'; // Import useEffect dan use
 import InputSection from '@/components/InputSection';
 import PreviewSection from '@/components/PreviewSection';
 import ResultSection from '@/components/ResultSection';
+import Image from 'next/image';
 
 export default function Home() {
   // State untuk input form
@@ -66,8 +67,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-8">
+    <main className="min-h-screen bg-slate-50 text-slate-800 p-4 sm:p-8">
       <header className="text-center mb-10">
+        <Image src="/horizontal.png" alt="Logo" width={300} height={300} className="mx-auto my-4" />
         <h1 className="text-4xl font-bold">Design <span className="text-sky-600">Accessibility</span> Checker</h1>
         <p className="text-slate-600 mt-2">
           Gunakan sistem fuzzy untuk menilai aksesibilitas desain Anda.

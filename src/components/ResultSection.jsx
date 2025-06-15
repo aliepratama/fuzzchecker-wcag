@@ -61,7 +61,7 @@ const ResultSection = ({ results, isLoading }) => { // Terima prop isLoading
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-      <h2 className="text-2xl font-semibold mb-4 border-b border-slate-200 pb-2">Hasil Penilaian</h2>
+      <h2 className="text-2xl text-slate-800 font-semibold mb-4 border-b border-slate-200 pb-2">Hasil Penilaian</h2>
       
       <div className="mb-6">
         <h3 className="text-lg font-medium text-sky-600 mb-3">Visibilitas Warna (WCAG)</h3>

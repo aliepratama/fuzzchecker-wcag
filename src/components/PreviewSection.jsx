@@ -24,7 +24,7 @@ const PreviewSection = ({ textColor, bgColor, headingSize, subheadingSize }) => 
   return (
     <div className="relative bg-white p-6 rounded-lg shadow-sm border border-slate-200 h-full">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold mb-4 border-b-2 border-slate-200 pb-2 w-full">
+        <h2 className="text-2xl text-slate-800 font-semibold mb-4 border-b-2 border-slate-200 pb-2 w-full">
           Pratinjau
         </h2>
         <button 

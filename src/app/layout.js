@@ -7,7 +7,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Design Accessibility Checker",
+  title: "FuzzChecker: Design Accessibility Checker",
   description: "Fuzzy Logic for Design Accessibility Assessment",
 };
 
