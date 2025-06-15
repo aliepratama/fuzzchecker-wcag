@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "FuzzChecker",
+  "version": "1.0",
+  "description": "Implementation of Fuzzy Mamdani Inference WCAG testing for Website.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Fuzzy WCAG Checker",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "96": "images/icon96.png",
+      "144": "images/icon144.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "96": "images/icon96.png",
+    "144": "images/icon144.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["fuzzy.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

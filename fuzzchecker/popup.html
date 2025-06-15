@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuzzy Accessibility Score</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <img src="images/vertical.png" style="margin-left:auto; margin-right: auto; display: block; width: 180px; height: auto;" alt="Logo FuzzChecker" class="logo">
+        <h2>Skor Aksesibilitas Kontras</h2>
+        <div class="card">
+            <p><strong>Input:</strong></p>
+            <ul>
+                <li>Luminositas BG: <span id="luminositas_bg">--</span></li>
+                <li>Saturasi BG: <span id="saturasi_bg">--</span></li>
+                <li>Luminositas FG: <span id="luminositas_fg">--</span></li>
+                <li>Saturasi FG: <span id="saturasi_fg">--</span></li>
+                <li>Ukuran Heading: <span id="ukuran_heading_kontras">--</span> px</li>
+            </ul>
+            <hr>
+            <p><strong>Output Skor WCAG:</strong> <span id="skor_wcag" class="output">Menghitung...</span></p>
+        </div>
+
+        <h2>Skor Aksesibilitas Kontekstual</h2>
+        <div class="card">
+            <p><strong>Input:</strong></p>
+            <ul>
+                <li>Lebar Perangkat: <span id="lebar_perangkat">--</span> px</li>
+                <li>Ukuran Heading: <span id="ukuran_heading_konteks">--</span> px</li>
+                <li>Ukuran Subheading: <span id="ukuran_subheading">--</span> px</li>
+            </ul>
+            <hr>
+            <p><strong>Output Visibilitas:</strong> <span id="skor_visibilitas" class="output">Menghitung...</span></p>
+        </div>
+    </div>
+    <script src="fuzzy.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
